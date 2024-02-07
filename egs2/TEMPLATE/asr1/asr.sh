@@ -599,6 +599,7 @@ fi
 
 if [ -n "${speed_perturb_factors}" ]; then
     train_set="${train_set}_sp"
+    # lm_train_text="${lm_train_text}_sp"
 fi
 
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ] && ! [[ " ${skip_stages} " =~ [[:space:]]3[[:space:]] ]]; then
@@ -866,10 +867,12 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ] && ! [[ " ${skip_stages} " =~ [
     fi
 
     # shellcheck disable=SC2002,SC2068,SC2005
-    for lm_txt in ${lm_train_text[@]}; do
-        suffix=$(echo "$(basename ${lm_txt})" | sed 's/text//')
-        <${lm_txt} awk -v suffix=${suffix} ' { if( NF != 1 ) {$1=$1 suffix; print $0; }} '
-    done > "${data_feats}/lm_train.txt"
+    if "${use_lm}"; then
+        for lm_txt in ${lm_train_text[@]}; do
+            suffix=$(echo "$(basename ${lm_txt})" | sed 's/text//')
+            <${lm_txt} awk -v suffix=${suffix} ' { if( NF != 1 ) {$1=$1 suffix; print $0; }} '
+        done > "${data_feats}/lm_train.txt"
+    fi
 fi
 
 
@@ -1509,6 +1512,9 @@ if [ ${stage} -le 12 ] && [ ${stop_stage} -ge 12 ] && ! [[ " ${skip_stages} " =~
     log "Generate '${asr_exp}/${inference_tag}/run.sh'. You can resume the process from stage 12 using this script"
     mkdir -p "${asr_exp}/${inference_tag}"; echo "${run_args} --stage 12 \"\$@\"; exit \$?" > "${asr_exp}/${inference_tag}/run.sh"; chmod +x "${asr_exp}/${inference_tag}/run.sh"
 
+
+    # Inference starts here
+    # TODO: Modify inference batch size
     inference_bin_tag=""
     if [ ${asr_task} == "asr" ]; then
         if "${use_k2}"; then

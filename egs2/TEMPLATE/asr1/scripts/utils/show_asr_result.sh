@@ -57,7 +57,7 @@ EOF
         echo "## ${expdir}"
         for type in wer cer ter; do
                 	cat << EOF
-### ${type^^}
+### ${type}
 
 |dataset|Snt|Wrd|Corr|Sub|Del|Ins|Err|S.Err|
 |---|---|---|---|---|---|---|---|---|
